@@ -1,20 +1,17 @@
 import { Box, Button, InputLabel, TextField, Typography } from "@mui/material";
 import axios from "axios";
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useStyles } from "./utils";
 
 const labelStyles = { mb: 1, mt: 2, fontSize: "24px", fontWeight: "bold" };
 
-const AddBlog = () => {
+const BlogEdit = () => {
   const classes = useStyles();
   const navigate = useNavigate();
-  const [inputs, setInputs] = useState({
-    title: "",
-    description: "",
-    imageURL: "",
-  });
-
+  const { id } = useParams();
+  const [inputs, setInputs] = useState({});
+  
   const handleChange = (e) => {
     setInputs((prevState) => ({
       ...prevState,
@@ -22,20 +19,36 @@ const AddBlog = () => {
     }));
   };
 
+  useEffect(() => {
+    const fetchBlogDetails = async () => {
+      try {
+        const res = await axios.get(`http://localhost:8000/api/blog/${id}`);
+        const data = res.data;
+        setInputs({
+          title: data.blog.title,
+          description: data.blog.description,
+          imageURL: data.blog.image,
+        });
+      } catch (error) {
+        console.error("Error fetching blog details:", error);
+      }
+    };
+
+    fetchBlogDetails();
+  }, [id]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:8000/api/blog/add", {
+      const res = await axios.put(`http://localhost:8000/api/blog/update/${id}`, {
         title: inputs.title,
         description: inputs.description,
-        image: inputs.imageURL,
-        user: localStorage.getItem("userId"),
       });
       const data = res.data;
       console.log(data);
-      navigate("/blogs");
+      navigate("/myBlogs");
     } catch (error) {
-      console.error("Error adding blog:", error);
+      console.error("Error updating blog:", error);
     }
   };
 
@@ -44,9 +57,9 @@ const AddBlog = () => {
       display="flex"
       justifyContent="center"
       alignItems="center"
-      minHeight="100vh" // Set minimum height to ensure the entire content is visible
-      backgroundColor="#f4f4f4" // Set a light background color
-      pt={10} // Add padding to the top to avoid overlapping with the navigation menu
+      minHeight="100vh"
+      backgroundColor="#f4f4f4"
+      pt={10}
     >
       <Box
         border={3}
@@ -54,19 +67,19 @@ const AddBlog = () => {
         borderRadius={10}
         padding={3}
         width="50%"
-        maxWidth="800px" // Limit the maximum width for better readability
-        bgcolor="white" // Set a white background color
-        boxShadow="0px 0px 20px rgba(0, 0, 0, 0.1)" // Add a subtle shadow
+        maxWidth="800px"
+        bgcolor="white"
+        boxShadow="0px 0px 20px rgba(0, 0, 0, 0.1)"
       >
         <Typography
           className={classes.font}
           fontWeight="bold"
-          color="primary" // Use a primary color for the heading
-          variant="h4" // Use a slightly smaller heading size
+          color="primary"
+          variant="h4"
           textAlign="center"
           mb={3}
         >
-          Post Your Blog
+          Edit Your Blog
         </Typography>
         <form onSubmit={handleSubmit}>
           <InputLabel className={classes.font} sx={labelStyles}>
@@ -76,7 +89,7 @@ const AddBlog = () => {
             className={classes.font}
             name="title"
             onChange={handleChange}
-            value={inputs.title}
+            value={inputs.title || ""}
             variant="outlined"
             fullWidth
             mb={3}
@@ -88,33 +101,21 @@ const AddBlog = () => {
             className={classes.font}
             name="description"
             onChange={handleChange}
-            value={inputs.description}
+            value={inputs.description || ""}
             variant="outlined"
             multiline
-            rows={10} // Increase the number of rows for description
-            fullWidth
-            mb={3}
-          />
-          <InputLabel className={classes.font} sx={labelStyles}>
-            Image URL
-          </InputLabel>
-          <TextField
-            className={classes.font}
-            name="imageURL"
-            onChange={handleChange}
-            value={inputs.imageURL}
-            variant="outlined"
+            rows={10}
             fullWidth
             mb={3}
           />
           <Button
-            sx={{ borderRadius: 4, mt: 2 }} // Add margin to the top of the button
+            sx={{ borderRadius: 4, mt: 2 }}
             variant="contained"
-            color="warning" // Use a primary color for the button
+            color="warning"
             type="submit"
             fullWidth
           >
-            Submit
+            Update
           </Button>
         </form>
       </Box>
@@ -122,4 +123,4 @@ const AddBlog = () => {
   );
 };
 
-export default AddBlog;
+export default BlogEdit;

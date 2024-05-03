@@ -7,30 +7,45 @@ import {
   Button,
   Tabs,
   Tab,
+  TextField,
+  IconButton,
+  CssBaseline,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { authActions } from "../store";
 import { useStyles } from "./utils";
+import { alpha } from "@mui/material/styles";
+import SearchIcon from "@mui/icons-material/Search";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+
 const Header = () => {
   const classes = useStyles();
-  const dispath = useDispatch();
+  const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.isLoggedIn);
 
-  const [value, setValue] = useState();
+  const [value, setValue] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const userId = localStorage.getItem("userId");
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
   return (
-    <AppBar
-      position="sticky"
-      sx={{
-        background:
-          "linear-gradient(90deg, rgba(58,75,180,1) 2%, rgba(116,49,110,1) 36%, rgba(2,0,161,1) 73%, rgba(69,92,252,1) 100%)",
-      }}
-    >
-      <Toolbar>
-        <Typography className={classes.font} variant="h4">
-          BlogsApp
-        </Typography>
-        {isLoggedIn && (
+    <>
+      <CssBaseline />
+      <AppBar
+        position="fixed"
+        sx={{
+          background:
+            "linear-gradient(90deg, rgba(58,75,180,1) 2%, rgba(116,49,110,1) 36%, rgba(2,0,161,1) 73%, rgba(69,92,252,1) 100%)",
+        }}
+      >
+        <Toolbar>
+          <Typography className={classes.font} variant="h4">
+            BlogsApp
+          </Typography>
           <Box display="flex" marginLeft={"auto"} marginRight="auto">
             <Tabs
               textColor="inherit"
@@ -41,7 +56,7 @@ const Header = () => {
                 className={classes.font}
                 LinkComponent={Link}
                 to="/blogs"
-                label="All Blogs"
+                label="Home"
               />
               <Tab
                 className={classes.font}
@@ -55,48 +70,85 @@ const Header = () => {
                 to="/blogs/add"
                 label="Add Blog"
               />
+              <Tab
+                className={classes.font}
+                LinkComponent={Link}
+                to="/premium"
+                label="Get Premium"
+              />
             </Tabs>
           </Box>
-        )}
-        <Box display="flex" marginLeft="auto">
-          {!isLoggedIn && (
-            <>
-              {" "}
-              <Button
-                LinkComponent={Link}
-                to="/auth"
-                variant="contained"
-                sx={{ margin: 1, borderRadius: 10 }}
-                color="warning"
-              >
-                Login
-              </Button>
-              <Button
-                LinkComponent={Link}
-                to="/auth"
-                variant="contained"
-                sx={{ margin: 1, borderRadius: 10 }}
-                color="warning"
-              >
-                Signup
-              </Button>
-            </>
-          )}
-          {isLoggedIn && (
-            <Button
-              onClick={() => dispath(authActions.logout())}
-              LinkComponent={Link}
-              to="/auth"
-              variant="contained"
-              sx={{ margin: 1, borderRadius: 10 }}
-              color="warning"
-            >
-              Logout
-            </Button>
-          )}
-        </Box>
-      </Toolbar>
-    </AppBar>
+          <Box marginLeft="auto">
+            <TextField
+              variant="outlined"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              sx={{
+                backgroundColor: "transparent", // Transparent background
+                borderRadius: 2,
+                ".MuiOutlinedInput-notchedOutline": { borderColor: "white" },
+                margin: 1,
+              }}
+              InputProps={{
+                style: { borderColor: "white" },
+                endAdornment: (
+                  <IconButton color="warning">
+                    <SearchIcon sx={{ fontSize: 38 }} />
+                  </IconButton>
+                ),
+              }}
+            />
+          </Box>
+          <Box display="flex" marginLeft="auto">
+            {!isLoggedIn && (
+              <>
+                <Button
+                  LinkComponent={Link}
+                  to="/auth"
+                  variant="contained"
+                  sx={{ margin: 1, borderRadius: 10 }}
+                  color="warning"
+                >
+                  Login
+                </Button>
+                <Button
+                  LinkComponent={Link}
+                  to="/auth"
+                  variant="contained"
+                  sx={{ margin: 1, borderRadius: 10 }}
+                  color="warning"
+                >
+                  Signup
+                </Button>
+              </>
+            )}
+            {isLoggedIn && (
+              <>
+                <IconButton
+                  LinkComponent={Link}
+                  to={`/user/${userId}`} // Link to the correct profile route
+                  color="inherit"
+                  sx={{ ml: 2 }}
+                >
+                  <AccountCircle sx={{ fontSize: 40 }} />
+                </IconButton>
+                <Button
+                  onClick={() => dispatch(authActions.logout())}
+                  LinkComponent={Link}
+                  to="/auth"
+                  variant="contained"
+                  sx={{ margin: 1, borderRadius: 10 }}
+                  color="warning"
+                >
+                  Logout
+                </Button>
+              </>
+            )}
+          </Box>
+        </Toolbar>
+      </AppBar>
+    </>
   );
 };
 

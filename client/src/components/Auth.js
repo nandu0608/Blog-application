@@ -21,32 +21,32 @@ const Auth = () => {
     }));
   };
   const sendRequest = async (type = "login") => {
-    const res = await axios
-      .post(`http://localhost:8000/api/user/${type}`, {
-        name: inputs.name,
-        email: inputs.email,
-        password: inputs.password,
-      })
-      .catch((err) => console.log(err));
-
-    const data = await res.data;
-    console.log(data);
-    return data;
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/user/${type}`,
+        {
+          ...(isSignup && { name: inputs.name }),
+          email: inputs.email,
+          password: inputs.password,
+        }
+      );
+      console.log(response.data)
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || "Something went wrong");
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    console.log(inputs);
-    if (isSignup) {
-      sendRequest("signup")
-        .then((data) => localStorage.setItem("userId", data.user._id))
-        .then(() => dispath(authActions.login()))
-        .then(() => naviagte("/blogs"));
-    } else {
-      sendRequest()
-        .then((data) => localStorage.setItem("userId", data.user._id))
-        .then(() => dispath(authActions.login()))
-        .then(() => naviagte("/blogs"));
+    try {
+      const data = await sendRequest(isSignup ? "signup" : "login");
+      localStorage.setItem("userId", data.user._id);
+      dispath(authActions.login());
+      naviagte("/blogs");
+    } catch (error) {
+      console.error("Authentication error:", error.message);
+      // Handle error display or other actions
     }
   };
   return (

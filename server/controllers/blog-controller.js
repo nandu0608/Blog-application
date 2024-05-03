@@ -70,7 +70,7 @@ exports.getById = async (req, res, next) => {
   const id = req.params.id;
   let blog;
   try {
-    blog = await Blog.findById(id);
+    blog = await Blog.findById(id).populate("user");;
   } catch (err) {
     return console.log(err);
   }
@@ -101,12 +101,17 @@ exports.getByUserId = async (req, res, next) => {
   const userId = req.params.id;
   let userBlogs;
   try {
-    userBlogs = await User.findById(userId).populate("blogs");
+    userBlogs = await User.findById(userId).populate({
+      path: "blogs",
+      populate: { path: "user" } // Populate the user field for each blog
+    });
   } catch (err) {
-    return console.log(err);
+    console.error(err);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
   if (!userBlogs) {
-    return res.status(404).json({ message: "No Blog Found" });
+    return res.status(404).json({ message: "No Blogs Found for this User" });
   }
   return res.status(200).json({ user: userBlogs });
 };
+

@@ -1,33 +1,28 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Blog from "./Blog";
+import BlogGrid from "./BlogGrid";
 
 const Blogs = () => {
-  const [blogs, setBlogs] = useState();
-  const sendRequest = async () => {
-    const res = await axios
-      .get("http://localhost:8000/api/blog")
-      .catch((err) => console.log(err));
-    const data = await res.data;
-    return data;
-  };
+  const [blogs, setBlogs] = useState([]);
+  const userId = localStorage.getItem("userId");
+
   useEffect(() => {
-    sendRequest().then((data) => setBlogs(data.blogs));
+    const fetchBlogs = async () => {
+      try {
+        const res = await axios.get("http://localhost:8000/api/blog");
+        const data = res.data;
+        setBlogs(data.blogs);
+      } catch (error) {
+        console.error("Error fetching blogs:", error);
+      }
+    };
+
+    fetchBlogs();
   }, []);
-  console.log(blogs);
+
   return (
     <div>
-      {blogs &&
-        blogs.map((blog, index) => (
-          <Blog
-            id={blog._id}
-            isUser={localStorage.getItem("userId") === blog.user._id}
-            title={blog.title}
-            description={blog.description}
-            imageURL={blog.image}
-            userName={blog.user.name}
-          />
-        ))}
+      <BlogGrid blogs={blogs} userId={userId} />
     </div>
   );
 };
