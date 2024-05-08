@@ -2,20 +2,23 @@ import { Box, Button, InputLabel, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useStyles } from "./utils";
+import { useTheme } from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 
 const labelStyles = { mb: 1, mt: 2, fontSize: "24px", fontWeight: "bold" };
 
 const BlogEdit = () => {
-  const classes = useStyles();
   const navigate = useNavigate();
   const { id } = useParams();
   const [inputs, setInputs] = useState({});
+
+  const theme = useTheme(); // Get the current theme
   
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setInputs((prevState) => ({
       ...prevState,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
@@ -58,61 +61,62 @@ const BlogEdit = () => {
       justifyContent="center"
       alignItems="center"
       minHeight="100vh"
-      backgroundColor="#f4f4f4"
       pt={10}
+      bgcolor={theme.palette.background.default} // Adapt to light or dark mode
     >
       <Box
         border={3}
-        borderColor="#ccc"
         borderRadius={10}
         padding={3}
         width="50%"
         maxWidth="800px"
-        bgcolor="white"
+        bgcolor={theme.palette.background.paper} // Match light/dark mode
         boxShadow="0px 0px 20px rgba(0, 0, 0, 0.1)"
       >
         <Typography
-          className={classes.font}
           fontWeight="bold"
-          color="primary"
           variant="h4"
           textAlign="center"
           mb={3}
+          sx={{ color: theme.palette.text.primary }} // Text color based on the theme
         >
           Edit Your Blog
         </Typography>
         <form onSubmit={handleSubmit}>
-          <InputLabel className={classes.font} sx={labelStyles}>
+          <InputLabel sx={{ ...labelStyles, color: theme.palette.text.primary }}>
             Title
           </InputLabel>
           <TextField
-            className={classes.font}
             name="title"
             onChange={handleChange}
             value={inputs.title || ""}
             variant="outlined"
             fullWidth
-            mb={3}
+            sx={{
+              backgroundColor: alpha(theme.palette.background.paper, 0.8),
+              ".MuiOutlinedInput-notchedOutline": { borderColor: theme.palette.divider },
+            }}
           />
-          <InputLabel className={classes.font} sx={labelStyles}>
+          <InputLabel sx={{ ...labelStyles, color: theme.palette.text.primary }}>
             Description
           </InputLabel>
           <TextField
-            className={classes.font}
             name="description"
             onChange={handleChange}
             value={inputs.description || ""}
             variant="outlined"
             multiline
-            rows={10}
+            rows={10} // Good space for editing descriptions
             fullWidth
-            mb={3}
+            sx={{
+              backgroundColor: alpha(theme.palette.background.paper, 0.8),
+              ".MuiOutlinedInput-notchedOutline": { borderColor: theme.palette.divider },
+            }}
           />
           <Button
             sx={{ borderRadius: 4, mt: 2 }}
             variant="contained"
             color="warning"
-            type="submit"
             fullWidth
           >
             Update
